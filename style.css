@@ -39,6 +39,11 @@
   --radius-sm: 6px;
   --radius-md: 14px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Profundidade — sombras com tinta da própria paleta, não preto puro */
+  --shadow-sm: 0 2px 10px rgba(30, 23, 18, 0.08), 0 1px 2px rgba(30, 23, 18, 0.06);
+  --shadow-md: 0 14px 34px rgba(30, 23, 18, 0.14), 0 4px 10px rgba(30, 23, 18, 0.08);
+  --shadow-brass: 0 10px 28px rgba(176, 138, 78, 0.28), 0 2px 8px rgba(30, 23, 18, 0.18);
 }
 
 /* ==========================================================================
@@ -58,6 +63,25 @@ body {
   background: var(--marfim);
   text-wrap: pretty;
   -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+/* Grão sutil sobre toda a página — a diferença entre uma cor chapada
+   de tela e a sensação de papel / madeira / latão escovado do escritório real.
+   Fixo, não interativo, muito discreto (opacity baixa + blend mode). */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after { display: none; }
 }
 
 img, picture { max-width: 100%; display: block; }
@@ -116,7 +140,17 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
   text-transform: uppercase;
   color: var(--vinho);
   margin-bottom: var(--space-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+}
+.eyebrow::before {
+  content: "";
   display: inline-block;
+  width: 1.4em;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
 }
 .eyebrow--light { color: var(--latao-claro); }
 
@@ -143,6 +177,7 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
    ========================================================================== */
 
 .btn {
+  position: relative;
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
@@ -153,11 +188,30 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
   font-weight: 600;
   font-size: 1rem;
   border: 1.5px solid transparent;
-  transition: transform 0.25s var(--ease), background-color 0.25s var(--ease), border-color 0.25s var(--ease);
+  transition: transform 0.25s var(--ease), background-color 0.25s var(--ease), border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
   min-height: 44px;
   justify-content: center;
+  overflow: hidden;
+  isolation: isolate;
 }
 .btn:hover { transform: translateY(-2px); }
+
+/* Brilho que segue o cursor — um verniz sutil de latão, não um glow genérico.
+   Posição controlada via --mx/--my, atualizados por JS no pointermove. */
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  background: radial-gradient(140px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.35), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+  pointer-events: none;
+}
+.btn:hover::before { opacity: 1; }
+@media (hover: none) {
+  .btn::before { display: none; }
+}
 .btn__meta {
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -168,7 +222,7 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
 }
 
 .btn--brass { background: var(--latao); color: var(--nogueira); }
-.btn--brass:hover { background: var(--latao-claro); }
+.btn--brass:hover { background: var(--latao-claro); box-shadow: var(--shadow-brass); }
 
 .btn--ghost {
   background: transparent;
@@ -197,6 +251,7 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
   backdrop-filter: blur(10px);
   padding-block: var(--space-2xs);
   box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  border-bottom: 1px solid rgba(176, 138, 78, 0.25);
 }
 
 .header-inner {
@@ -283,6 +338,14 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
   height: 100%;
   object-fit: cover;
   object-position: 78% 32%;
+  animation: hero-zoom 18s var(--ease) both;
+}
+@keyframes hero-zoom {
+  from { transform: scale(1.08); }
+  to { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero__media img { animation: none; }
 }
 .hero__scrim {
   position: absolute;
@@ -293,6 +356,30 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
 }
 
 .hero__content { max-width: 46rem; }
+
+/* Entrada coreografada — cada linha do hero chega em sequência, como
+   quem apresenta um caso: primeiro o contexto, depois a tese, depois a ação. */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero__content > .eyebrow,
+.hero__content > .hero__title,
+.hero__content > .hero__lede,
+.hero__content > .hero__ctas {
+  animation: hero-rise 1s var(--ease) both;
+}
+.hero__content > .eyebrow { animation-delay: 0.05s; }
+.hero__content > .hero__title { animation-delay: 0.18s; }
+.hero__content > .hero__lede { animation-delay: 0.36s; }
+.hero__content > .hero__ctas { animation-delay: 0.52s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__content > .eyebrow,
+  .hero__content > .hero__title,
+  .hero__content > .hero__lede,
+  .hero__content > .hero__ctas { animation: none; }
+}
 
 .hero__title {
   font-size: var(--step-3xl);
@@ -345,7 +432,21 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
    Seções genéricas
    ========================================================================== */
 
-.section { padding-block: var(--space-xl); }
+.section { position: relative; padding-block: var(--space-xl); }
+
+/* Filete de latão entre seções — separa sem cortar, como a moldura
+   dourada dos quadros na recepção do escritório. */
+.section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, 60%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(176, 138, 78, 0.55), transparent);
+}
+
 .section--ivory { background: var(--marfim); }
 .section--marfim-escuro { background: var(--marfim-escuro); }
 .section--nogueira {
@@ -408,6 +509,19 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
   border-radius: var(--radius-md);
   padding: var(--space-md);
   align-self: start;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+/* Canto de latão — um detalhe de encadernação fina, não um ícone genérico. */
+.sobre-stats::before {
+  content: "";
+  position: absolute;
+  top: 0; right: 0;
+  width: 28px; height: 28px;
+  border-top: 2px solid var(--latao);
+  border-right: 2px solid var(--latao);
+  border-top-right-radius: var(--radius-md);
+  opacity: 0.6;
 }
 .stat { display: flex; flex-direction: column; gap: 0.2em; }
 .stat__num {
@@ -415,6 +529,7 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
   font-size: var(--step-xl);
   color: var(--vinho);
   line-height: 1;
+  font-feature-settings: "onum" 1;
 }
 .stat__label {
   font-family: var(--font-mono);
@@ -441,14 +556,31 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
 }
 
 .docket-item {
+  position: relative;
   display: grid;
   grid-template-columns: 5rem 1fr;
   gap: var(--space-sm);
   padding-block: var(--space-sm);
+  padding-left: var(--space-xs);
+  margin-left: calc(var(--space-xs) * -1);
   border-bottom: 1px solid rgba(241,233,220,0.15);
-  transition: background-color 0.3s var(--ease);
+  transition: background-color 0.35s var(--ease), padding-left 0.35s var(--ease);
 }
-.docket-item:hover { background: rgba(176,138,78,0.06); }
+.docket-item::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--latao);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.35s var(--ease);
+}
+.docket-item:hover {
+  background: rgba(176,138,78,0.06);
+  padding-left: var(--space-sm);
+}
+.docket-item:hover::before { transform: scaleY(1); }
 
 .docket-item__num {
   font-family: var(--font-mono);
@@ -476,22 +608,38 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
   gap: var(--space-lg);
   align-items: center;
 }
+.atendimento-media { overflow: hidden; border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
 .atendimento-media img {
   border-radius: var(--radius-md);
   aspect-ratio: 4 / 3;
   object-fit: cover;
+  transition: transform 0.7s var(--ease);
 }
+.atendimento-media:hover img { transform: scale(1.03); }
 
-.steps { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+.steps { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); position: relative; }
+/* Linha fina conectando as etapas — o processo é mesmo sequencial,
+   então a linha reforça o que o número já diz. */
+.steps::before {
+  content: "";
+  position: absolute;
+  left: 1.1rem;
+  top: 1.1rem;
+  bottom: 1.1rem;
+  width: 1px;
+  background: linear-gradient(to bottom, rgba(176,138,78,0.5), rgba(176,138,78,0.12));
+}
 .steps__item {
+  position: relative;
   display: grid;
   grid-template-columns: 3rem 1fr;
   gap: var(--space-xs);
 }
 .steps__num {
+  position: relative;
   font-family: var(--font-mono);
   color: var(--latao);
-  font-size: var(--step-base);
+  background: var(--marfim);
   border: 1px solid var(--latao);
   border-radius: 50%;
   width: 2.2rem;
@@ -500,7 +648,9 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
   align-items: center;
   justify-content: center;
   font-size: 0.85rem;
+  transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
 }
+.steps__item:hover .steps__num { background: var(--latao); color: var(--branco); }
 .steps__item h3 { font-size: var(--step-base); font-family: var(--font-body); font-weight: 700; margin-bottom: 0.25em; }
 .steps__item p { color: var(--grafite); font-size: var(--step-sm); max-width: 48ch; }
 
@@ -533,9 +683,21 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
   display: flex;
   flex-direction: column;
   container-type: inline-size;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.4s var(--ease), transform 0.4s var(--ease);
 }
-.socio-card picture { aspect-ratio: 1; }
-.socio-card img { width: 100%; height: 100%; object-fit: cover; }
+.socio-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+}
+.socio-card picture { aspect-ratio: 1; overflow: hidden; }
+.socio-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--ease);
+}
+.socio-card:hover img { transform: scale(1.045); }
 .socio-card__body { padding: var(--space-sm); }
 .socio-card__tag {
   font-family: var(--font-mono);
@@ -567,7 +729,9 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
   gap: var(--space-lg);
   align-items: center;
 }
-.contato-media img { border-radius: var(--radius-md); aspect-ratio: 4/3; object-fit: cover; }
+.contato-media { overflow: hidden; border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
+.contato-media img { border-radius: var(--radius-md); aspect-ratio: 4/3; object-fit: cover; transition: transform 0.7s var(--ease); }
+.contato-media:hover img { transform: scale(1.03); }
 
 .contato-list { display: grid; gap: var(--space-sm); margin-top: var(--space-md); }
 .contato-list li {
@@ -588,6 +752,8 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
   font-family: var(--font-display);
   font-size: var(--step-lg);
   color: var(--latao-claro);
+  font-feature-settings: "onum" 1;
+  transition: color 0.25s var(--ease);
 }
 .contato-list a:hover { color: var(--branco); }
 .contato-list span:not(.contato-list__label) { font-size: var(--step-base); color: var(--nevoa); }
@@ -634,9 +800,27 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
   align-items: center;
   justify-content: center;
   box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-  transition: transform 0.25s var(--ease);
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
-.whatsapp-fab:hover { transform: scale(1.08); }
+.whatsapp-fab::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(37, 211, 102, 0.55);
+  animation: fab-ring 2.6s var(--ease) infinite;
+}
+@keyframes fab-ring {
+  0% { transform: scale(0.92); opacity: 0.9; }
+  70%, 100% { transform: scale(1.35); opacity: 0; }
+}
+.whatsapp-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+@media (prefers-reduced-motion: reduce) {
+  .whatsapp-fab::before { animation: none; }
+}
 
 /* ==========================================================================
    Reveal on scroll

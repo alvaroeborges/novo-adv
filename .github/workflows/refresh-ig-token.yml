@@ -1,0 +1,35 @@
+name: Renovar token do Instagram
+
+# O token de longa duração do Instagram dura 60 dias. Este workflow roda no
+# dia 1 e no dia 15 de cada mês (bem dentro da janela de segurança) e
+# substitui automaticamente o secret IG_ACCESS_TOKEN por um token novo.
+
+on:
+  schedule:
+    - cron: "0 6 1,15 * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  refresh-token:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar dependência de criptografia do secret
+        run: npm install libsodium-wrappers --no-save
+
+      - name: Renovar token e atualizar o secret
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/refresh-ig-token.js

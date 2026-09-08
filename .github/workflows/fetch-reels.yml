@@ -1,0 +1,38 @@
+name: Buscar novos Reels do Instagram
+
+on:
+  schedule:
+    - cron: "0 */3 * * *" # a cada 3 horas
+  workflow_dispatch: {} # permite rodar manualmente pela aba Actions
+
+permissions:
+  contents: write # necessário para o job poder dar commit/push no reels.json
+
+jobs:
+  fetch-reels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Buscar reels na API do Instagram
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: node scripts/fetch-reels.js
+
+      - name: Commitar reels.json se houver mudança
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reels.json
+          if git diff --cached --quiet; then
+            echo "Nenhum reel novo."
+          else
+            git commit -m "chore: atualiza reels.json"
+            git push
+          fi

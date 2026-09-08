@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupMobileNav();
   setupScrollReveal();
   setupSmoothAnchorLinks();
+  setupReelsSection();
 });
 
 // Atualiza o ano no rodapé automaticamente, sem precisar editar todo ano.
@@ -61,6 +62,13 @@ function setupMobileNav() {
 // respeitando quem prefere menos movimento na tela.
 function setupScrollReveal() {
   const targets = document.querySelectorAll(".reveal, .signature-diagram");
+  observeReveal(targets);
+}
+
+// Helper reaproveitado pelo scroll reveal inicial e por elementos inseridos
+// dinamicamente depois (como a seção de reels), que não existem ainda no
+// momento do DOMContentLoaded.
+function observeReveal(targets) {
   if (!targets.length) return;
 
   const prefersReducedMotion = window.matchMedia(
@@ -106,4 +114,91 @@ function setupSmoothAnchorLinks() {
       window.scrollTo({ top, behavior: "smooth" });
     });
   });
+}
+
+// Busca os reels mais recentes (reels.json, gerado pelo GitHub Actions a
+// partir da API do Instagram) e monta uma seção nova entre "Equipe" e
+// "Contato" — o HTML original não é tocado, a seção é montada em runtime.
+async function setupReelsSection() {
+  try {
+    const response = await fetch("./reels.json", { cache: "no-store" });
+    if (!response.ok) return;
+
+    const reels = await response.json();
+    if (!Array.isArray(reels) || reels.length === 0) return;
+
+    const section = buildReelsSection(reels);
+    const contato = document.getElementById("contato");
+    const main = document.getElementById("conteudo");
+
+    if (contato && main) {
+      main.insertBefore(section, contato);
+    } else {
+      main?.appendChild(section);
+    }
+
+    observeReveal(section.querySelectorAll(".reveal"));
+    loadInstagramEmbedScript();
+  } catch (error) {
+    // Falha silenciosa: se o Instagram estiver fora do ar ou o arquivo
+    // ainda não existir, a página segue funcionando normalmente sem a seção.
+    console.warn("Não foi possível carregar os reels:", error);
+  }
+}
+
+function buildReelsSection(reels) {
+  const section = document.createElement("section");
+  section.className = "section section--ivory reels-section";
+  section.id = "reels";
+
+  const wrap = document.createElement("div");
+  wrap.className = "wrap reels-wrap";
+
+  const eyebrow = document.createElement("p");
+  eyebrow.className = "eyebrow";
+  eyebrow.textContent = "No Instagram";
+
+  const title = document.createElement("h2");
+  title.className = "section-title reveal";
+  title.innerHTML = "Conteúdo recente, <em>direto do Instagram</em>";
+
+  const grid = document.createElement("div");
+  grid.className = "reels-grid";
+
+  reels.forEach((reel) => {
+    const card = document.createElement("div");
+    card.className = "reel-card reveal";
+
+    const blockquote = document.createElement("blockquote");
+    blockquote.className = "instagram-media";
+    blockquote.setAttribute("data-instgrm-permalink", reel.permalink);
+    blockquote.setAttribute("data-instgrm-version", "14");
+
+    card.appendChild(blockquote);
+    grid.appendChild(card);
+  });
+
+  wrap.append(eyebrow, title, grid);
+  section.appendChild(wrap);
+  return section;
+}
+
+// Carrega o script oficial de embed do Instagram uma única vez. Se os
+// blockquotes forem inseridos depois que o script já rodou, chama
+// window.instgrm.Embeds.process() para processar os novos.
+function loadInstagramEmbedScript() {
+  if (window.instgrm) {
+    window.instgrm.Embeds.process();
+    return;
+  }
+
+  const existing = document.querySelector(
+    'script[src*="instagram.com/embed.js"]'
+  );
+  if (existing) return;
+
+  const script = document.createElement("script");
+  script.src = "https://www.instagram.com/embed.js";
+  script.async = true;
+  document.body.appendChild(script);
 }

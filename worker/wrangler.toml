@@ -1,0 +1,11 @@
+name = "adv-formulario"
+main = "index.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+# Origem do site (sem barra no final). Mude se o site ganhar domínio próprio.
+ALLOWED_ORIGIN = "https://alvaroeborges.github.io"
+
+# Segredos — definidos pelo terminal, NÃO ficam neste arquivo:
+#   npx wrangler secret put CALLMEBOT_PHONE    (ex.: 5534984358440)
+#   npx wrangler secret put CALLMEBOT_APIKEY   (chave que o CallMeBot enviou)

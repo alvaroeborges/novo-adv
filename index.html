@@ -301,6 +301,54 @@
       </div>
     </section>
 
+    <!-- MENSAGEM RÁPIDA — monta a mensagem e abre o WhatsApp do advogado (ver setupContactForm em script.js) -->
+    <section class="section section--ivory" id="mensagem">
+      <div class="wrap mensagem-grid">
+        <div class="mensagem-text">
+          <p class="eyebrow">Deixe sua mensagem</p>
+          <h2 class="section-title reveal">Tem uma dúvida? <em>Nós retornamos.</em></h2>
+          <p class="body-lg">
+            Conte, em poucas palavras, o que você precisa. Sua mensagem chega direto no WhatsApp
+            do advogado, que responde assim que possível.
+          </p>
+        </div>
+
+        <form class="mensagem-form reveal" id="contactForm" novalidate>
+          <div class="field">
+            <label for="cfNome">Nome</label>
+            <input type="text" id="cfNome" name="nome" autocomplete="name" maxlength="80" required>
+            <p class="field__error" id="cfNomeErro" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="cfWhats">Telefone de Contato</label>
+            <input type="tel" id="cfWhats" name="whatsapp" inputmode="tel" autocomplete="tel-national"
+              placeholder="(XX) 99999-9999" maxlength="16" required>
+            <p class="field__error" id="cfWhatsErro" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="cfMsg">No que possamos ajudar</label>
+            <textarea id="cfMsg" name="mensagem" rows="5" maxlength="1000" required></textarea>
+            <p class="field__error" id="cfMsgErro" role="alert"></p>
+          </div>
+
+          <!-- Campo-isca anti-robô: escondido de pessoas, o Worker descarta quem o preenche -->
+          <div class="field field--trap" aria-hidden="true">
+            <label for="cfSite">Não preencha este campo</label>
+            <input type="text" id="cfSite" name="site" tabindex="-1" autocomplete="off">
+          </div>
+
+          <button type="submit" class="btn btn--brass" id="cfSubmit">
+            Enviar
+            
+          </button>
+
+          <p class="form-status" id="cfStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
     <!-- CONTATO -->
     <section class="section section--nogueira" id="contato">
       <div class="wrap contato-grid">
@@ -325,7 +373,7 @@
             </li>
             <li>
               <span class="contato-list__label">E-mail</span>
-              <a href="mailto:contato@jonathanassociados.adv.br">contato@jonathanassociados.adv.br</a>
+              <a href="mailto:rodriguesadvocacia.adv01@gmail.com">rodriguesadvocacia.adv01@gmail.com</a>
             </li>
             <li>
               <span class="contato-list__label">Atendimento</span>

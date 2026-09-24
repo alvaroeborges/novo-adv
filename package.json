@@ -1,0 +1,30 @@
+{
+  "name": "jonathan-associados-agendamento",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend de agendamento de reuniões (Google Calendar + Meet) para o site Jonathan & Associados.",
+  "type": "commonjs",
+  "main": "server/server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "nodemon server/server.js",
+    "token": "node server/generate-token.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.4.1",
+    "googleapis": "^144.0.0",
+    "helmet": "^8.0.0",
+    "luxon": "^3.5.0",
+    "nodemailer": "^6.9.16",
+    "validator": "^13.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

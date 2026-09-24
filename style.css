@@ -732,6 +732,61 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
 .socio-card__links a:hover { color: var(--latao); }
 
 /* ==========================================================================
+   Mensagem rápida (formulário → WhatsApp)
+   ========================================================================== */
+
+.mensagem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  align-items: center;
+}
+.mensagem-form {
+  display: grid;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--branco);
+  border: 1px solid rgba(30,23,18,0.08);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+.field { display: grid; gap: 0.4em; }
+.field label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--grafite);
+}
+.field input,
+.field textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--nogueira);
+  background: var(--marfim);
+  border: 1.5px solid var(--marfim-escuro);
+  border-radius: var(--radius-sm);
+  padding: 0.8em 1em;
+  min-height: 44px;
+  transition: border-color 0.25s var(--ease), background-color 0.25s var(--ease);
+}
+.field textarea { resize: vertical; min-height: 8em; }
+.field input:focus,
+.field textarea:focus { outline: none; border-color: var(--latao); background: var(--branco); }
+.field input:focus-visible,
+.field textarea:focus-visible { outline: 2px solid var(--latao); outline-offset: 2px; }
+.field.is-invalid input,
+.field.is-invalid textarea { border-color: var(--vinho); }
+.field__error { min-height: 1.1em; font-size: var(--step-sm); color: var(--vinho); }
+.mensagem-form .btn { justify-self: start; }
+.mensagem-form .btn:disabled { opacity: 0.6; cursor: wait; transform: none; }
+.field--trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.form-status { min-height: 1.4em; font-size: var(--step-sm); color: var(--grafite); }
+.form-status.is-success { color: var(--vinho); font-weight: 600; }
+.form-status.is-error { color: var(--vinho); }
+.form-status a { text-decoration: underline; text-underline-offset: 2px; }
+
+/* ==========================================================================
    Contato
    ========================================================================== */
 
@@ -873,7 +928,7 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
   .site-nav.is-open { transform: translateX(0); }
   .nav-toggle { display: flex; }
 
-  .sobre-grid, .atendimento-grid, .contato-grid { grid-template-columns: 1fr; }
+  .sobre-grid, .atendimento-grid, .contato-grid, .mensagem-grid { grid-template-columns: 1fr; }
   .atendimento-media { order: -1; }
   .equipe-grid { grid-template-columns: 1fr; }
   .signature-diagram--connector { display: none; }

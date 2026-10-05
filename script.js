@@ -9,7 +9,81 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSmoothAnchorLinks();
   setupReelsSection();
   setupContactForm();
+  setupCounters();
+  setupButtonGlow();
+  setupSituacoes();
 });
+
+// "Qual é a sua situação?": ao clicar numa opção, a página rola até o
+// formulário (setupSmoothAnchorLinks cuida da rolagem) e a mensagem já vem
+// escrita com o assunto escolhido, pronta para a pessoa completar.
+function setupSituacoes() {
+  const msg = document.getElementById("cfMsg");
+  if (!msg) return;
+
+  document.querySelectorAll("[data-situacao]").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      msg.value = `${chip.dataset.situacao} `;
+      msg.dispatchEvent(new Event("input")); // limpa um erro de validação anterior
+      // Foca depois da rolagem suave, sem dar um segundo salto na página.
+      setTimeout(() => {
+        msg.focus({ preventScroll: true });
+        msg.setSelectionRange(msg.value.length, msg.value.length);
+      }, 600);
+    });
+  });
+}
+
+// Faixa de números: conta de 0 até o valor de data-count quando a faixa
+// aparece na tela. Sem animação para quem prefere menos movimento.
+function setupCounters() {
+  const counters = document.querySelectorAll("[data-count]");
+  if (!counters.length) return;
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce || !("IntersectionObserver" in window)) return;
+
+  const animate = (el) => {
+    const target = Number(el.dataset.count);
+    const duration = 1400;
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * eased);
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        animate(entry.target);
+        observer.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.6 }
+  );
+
+  counters.forEach((el) => {
+    el.textContent = "0";
+    observer.observe(el);
+  });
+}
+
+// Brilho que segue o cursor nos botões: atualiza --mx/--my usados no CSS.
+function setupButtonGlow() {
+  if (!window.matchMedia("(hover: hover)").matches) return;
+  document.querySelectorAll(".btn").forEach((btn) => {
+    btn.addEventListener("pointermove", (event) => {
+      const rect = btn.getBoundingClientRect();
+      btn.style.setProperty("--mx", `${event.clientX - rect.left}px`);
+      btn.style.setProperty("--my", `${event.clientY - rect.top}px`);
+    });
+  });
+}
 
 // Número do advogado (DDI + DDD + número), usado no plano B do formulário.
 const CONTACT_WHATSAPP = "5534984358440";
@@ -186,7 +260,7 @@ function setupMobileNav() {
 // o diagrama-assinatura). Verifica prefers-reduced-motion antes de animar,
 // respeitando quem prefere menos movimento na tela.
 function setupScrollReveal() {
-  const targets = document.querySelectorAll(".reveal, .signature-diagram");
+  const targets = document.querySelectorAll(".reveal");
   observeReveal(targets);
 }
 

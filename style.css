@@ -1046,26 +1046,7 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
 
 .mobile-bar { display: none; }
 
-/* ==========================================================================
-   Reveal on scroll
-   ========================================================================== */
-
-.reveal {
-  opacity: 0;
-  transform: translateY(18px);
-  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
-}
-.reveal.in-view { opacity: 1; transform: translateY(0); }
-
-/* Cards em sequência, um depois do outro */
-.areas-grid .reveal:nth-child(2), .numeros-list .reveal:nth-child(2) { transition-delay: 0.08s; }
-.areas-grid .reveal:nth-child(3), .numeros-list .reveal:nth-child(3) { transition-delay: 0.16s; }
-.areas-grid .reveal:nth-child(4), .numeros-list .reveal:nth-child(4) { transition-delay: 0.24s; }
-.areas-grid .reveal:nth-child(5) { transition-delay: 0.32s; }
-.areas-grid .reveal:nth-child(6) { transition-delay: 0.4s; }
-
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1; transform: none; transition: none; }
   .hero__media img, .hero__content > *, .hero__trust { animation: none; }
   .whatsapp-fab::before { animation: none; }
 }

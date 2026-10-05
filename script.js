@@ -5,11 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setFooterYear();
   setupHeaderScrollState();
   setupMobileNav();
-  setupScrollReveal();
   setupSmoothAnchorLinks();
   setupReelsSection();
   setupContactForm();
-  setupCounters();
   setupButtonGlow();
   setupSituacoes();
 });
@@ -31,45 +29,6 @@ function setupSituacoes() {
         msg.setSelectionRange(msg.value.length, msg.value.length);
       }, 600);
     });
-  });
-}
-
-// Faixa de números: conta de 0 até o valor de data-count quando a faixa
-// aparece na tela. Sem animação para quem prefere menos movimento.
-function setupCounters() {
-  const counters = document.querySelectorAll("[data-count]");
-  if (!counters.length) return;
-
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduce || !("IntersectionObserver" in window)) return;
-
-  const animate = (el) => {
-    const target = Number(el.dataset.count);
-    const duration = 1400;
-    const start = performance.now();
-    const tick = (now) => {
-      const p = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - p, 3);
-      el.textContent = Math.round(target * eased);
-      if (p < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  };
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        animate(entry.target);
-        observer.unobserve(entry.target);
-      });
-    },
-    { threshold: 0.6 }
-  );
-
-  counters.forEach((el) => {
-    el.textContent = "0";
-    observer.observe(el);
   });
 }
 
@@ -256,44 +215,6 @@ function setupMobileNav() {
   });
 }
 
-// Revela elementos suavemente conforme entram na tela (cards, textos,
-// o diagrama-assinatura). Verifica prefers-reduced-motion antes de animar,
-// respeitando quem prefere menos movimento na tela.
-function setupScrollReveal() {
-  const targets = document.querySelectorAll(".reveal");
-  observeReveal(targets);
-}
-
-// Helper reaproveitado pelo scroll reveal inicial e por elementos inseridos
-// dinamicamente depois (como a seção de reels), que não existem ainda no
-// momento do DOMContentLoaded.
-function observeReveal(targets) {
-  if (!targets.length) return;
-
-  const prefersReducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
-
-  if (prefersReducedMotion || !("IntersectionObserver" in window)) {
-    targets.forEach((el) => el.classList.add("in-view"));
-    return;
-  }
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("in-view");
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.2, rootMargin: "0px 0px -60px 0px" }
-  );
-
-  targets.forEach((el) => observer.observe(el));
-}
-
 // Rolagem suave para os links do menu que apontam para âncoras da própria
 // página, considerando a altura do cabeçalho fixo para não cortar o título.
 function setupSmoothAnchorLinks() {
@@ -336,7 +257,6 @@ async function setupReelsSection() {
       main?.appendChild(section);
     }
 
-    observeReveal(section.querySelectorAll(".reveal"));
     loadInstagramEmbedScript();
   } catch (error) {
     // Falha silenciosa: se o Instagram estiver fora do ar ou o arquivo
@@ -358,7 +278,7 @@ function buildReelsSection(reels) {
   eyebrow.textContent = "No Instagram";
 
   const title = document.createElement("h2");
-  title.className = "section-title reveal";
+  title.className = "section-title";
   title.innerHTML = "Conteúdo recente, <em>direto do Instagram</em>";
 
   const grid = document.createElement("div");
@@ -366,7 +286,7 @@ function buildReelsSection(reels) {
 
   reels.forEach((reel) => {
     const card = document.createElement("div");
-    card.className = "reel-card reveal";
+    card.className = "reel-card";
 
     const blockquote = document.createElement("blockquote");
     blockquote.className = "instagram-media";
